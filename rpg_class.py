@@ -4,6 +4,7 @@ import time
 
 class Items:
     """Parent class of all items in game"""
+
     def __init__(self):
         self.weight = None
         self.name = ''
@@ -13,6 +14,7 @@ class Items:
 
 class Weapon(Items):
     """Items that do damage"""
+
     def __init__(self, value=50, attack=8, name='Steel Straight Sword'):
         super().__init__()
         self.value = value
@@ -31,6 +33,7 @@ class Weapon(Items):
 
 class Gold(Items):
     """In game currency"""
+
     def __init__(self):
         super().__init__()
         self.name = 'Gold'
@@ -48,12 +51,13 @@ class Gold(Items):
 
 class Armor(Items):
     """Items that add defense"""
+
     def __init__(self, name='Leather Armor', defense=5, value=30):
-    	super().__init__()
-    	self.name = name
-    	self.defense = defense
-    	self.value = value
-    
+        super().__init__()
+        self.name = name
+        self.defense = defense
+        self.value = value
+
     def __hash__(self):
         return hash((self.defense, self.name))
 
@@ -71,6 +75,7 @@ class Potions(Items):
 
 class Characters:
     """Parent class of characters in game"""
+
     def __init__(self):
         self.name = ''
         self.health = None
@@ -101,14 +106,15 @@ class Characters:
 
 class Player(Characters):
     """The player character with starter stats"""
+
     def __init__(self, health=50, health_max=80,
                  state='normal', attack=8, defense=5):
         super().__init__()
-        self.health     = health
+        self.health = health
         self.health_max = health_max
-        self.state      = state
-        self.attack     = attack
-        self.defense    = defense
+        self.state = state
+        self.attack = attack
+        self.defense = defense
 
     def quit(self):
         """Quit and exit game"""
@@ -119,12 +125,12 @@ class Player(Characters):
         """Prints a list of in-game keys"""
         print('Options are:')
         for i, k in enumerate(Commands.keys()):
-        	if i == len(Commands.keys()) - 1:
-        		print(k + '.')
-        	elif i % 3 == 0:
-        		print(k + ',')
-        	else:
-        		print(k, end=', ')
+            if i == len(Commands.keys()) - 1:
+                print(k + '.')
+            elif i % 3 == 0:
+                print(k + ',')
+            else:
+                print(k, end=', ')
 
     def show_stats(self):
         """Prints player health, attack, and defense"""
@@ -157,7 +163,7 @@ class Player(Characters):
             self.enemy_attacks()
         else:
             print(f'{self.name} rests.')
-            dice = r.randint(1,10)
+            dice = r.randint(1, 10)
             if dice <= 2:
                 self.enemy = Goblin()
                 print(f'{self.name} is startled awake!')
@@ -235,7 +241,7 @@ class Player(Characters):
                     print(f'{item.name} equipped!')
             if self.equipped['weapon'] is None:
                 print('No weapon equipped')
-                
+
     def equipa(self):
         """[IN PROGRESS] Equips armor in inventory"""
         if self.equipped['armor'] is None:
@@ -257,173 +263,179 @@ class Player(Characters):
             while exploring:
                 if self.health <= 0:
                     break
-                print('\nWhere do you want to explore?:')
-                area = int(input('[0]exit \n[1]cave \n[2]forest \n[3]city \n> '))
-                if area == 0:
-                    exploring = False
-                if area == 1:
-                    print(f'\n{self.name} pokes around a dark cave...')
-                    spelunking = True
-                    message = [f'{self.name} is hearing noises...',
-                    			'Into the abyss...',
-                    		   f'{self.name} isn\'t urinating out of fear right now at all...',
-                    		    '-...What was that?']
-                    while spelunking:
-                        dice = r.randint(1, 10)
-                        print('\n' + r.choice(message))
-                        if dice >= 8:
-                            if dice % 2 == 0:
-                                print('Found some Gold!')
-                                gold = Gold()
-                                gold.name = 'Gold'
-                                if gold in self.inventory.keys():
-                                    self.inventory[gold] += r.randint(20, 150)
-                                else:
-                                    self.inventory.setdefault(gold, r.randint(20, 150))
-                            else:
-                                print('Found some armor!')
-                                armor = Armor()
-                                armor.descrpit = 'A light set of armor'
-                                if armor in self.inventory.keys():
-                                    self.inventory[armor] += 1
-                                else:
-                                    self.inventory.setdefault(armor, 1)
-                        else:
-                            self.enemy = Goblin()
-                            print(f'\n{self.name} found a goblin in the cave!')
-                            self.enemy_attacks()
-                            self.state = 'fight'
-                        if self.state == 'fight':
-                            fighting = True
-                            while fighting:
-                                fight_or_flee = input('\nStay and fight or flee? > ')
-                                if fight_or_flee == 'fight':
-                                    self.fight()
-                                    fighting = False
-                                elif fight_or_flee == 'flee':
-                                    self.flee()
-                                    if self.enemy is not None:
-                                        self.fight()
-                                        fighting = False
+                try:
+                    print('\nWhere do you want to explore?:')
+                    area = int(input('[0]exit \n[1]cave \n[2]forest \n[3]city \n> '))
+                    if area == 0:
+                        exploring = False
+                    if area == 1:
+                        print(f'\n{self.name} pokes around a dark cave...')
+                        spelunking = True
+                        message = [f'{self.name} is hearing noises...',
+                                   'Into the abyss...',
+                                   f'{self.name} isn\'t urinating out of fear right now at all...',
+                                   '-...What was that?']
+                        while spelunking:
+                            dice = r.randint(1, 10)
+                            print('\n' + r.choice(message))
+                            if dice >= 8:
+                                if dice % 2 == 0:
+                                    print('Found some Gold!')
+                                    gold = Gold()
+                                    gold.name = 'Gold'
+                                    if gold in self.inventory.keys():
+                                        self.inventory[gold] += r.randint(20, 150)
                                     else:
-                                        fighting = False
+                                        self.inventory.setdefault(gold, r.randint(20, 150))
                                 else:
-                                    print('Try again.')
-                        
-                        if self.health <= 0:
-                            break
-                        choice = input('Go deeper in the cave? [y/n] > ')
-                        if choice == 'n':
-                            spelunking = False
-                if area == 2:
-                    forest_lvl = 1
-                    camping = True
-                    message = [f'{self.name} frolics through the forest...', 
-                               f'{self.name} heads over the medow and through the woods...',
-                               f'{self.name} is stumbling about in the woods...',
-                               f'{self.name} finally feels free in the wilderness...']
-                    while camping:
-                        dice = r.randint(1, 10)
-                        print('\n' + r.choice(message))
-                        if forest_lvl % 10 == 0:
-                            answer = int(input('\nA dark fog creeps along the forest floor...\nWill you stick around? '
-                                               '\n[1]I ain\'t scared of no fog! \n[2]GET ME OUTTA HERE. \n> '))
-                            if answer == 1:
-                                self.enemy = Boss()
-                                print(f'{self.enemy.name} walked menacingly out of the fog.')
+                                    print('Found some armor!')
+                                    armor = Armor()
+                                    armor.descrpit = 'A light set of armor'
+                                    if armor in self.inventory.keys():
+                                        self.inventory[armor] += 1
+                                    else:
+                                        self.inventory.setdefault(armor, 1)
+                            else:
+                                self.enemy = Goblin()
+                                print(f'\n{self.name} found a goblin in the cave!')
                                 self.enemy_attacks()
                                 self.state = 'fight'
-                            else:
-                                print('I didn\'t want to know either...')
-                                camping = False
-                                break
-                        elif dice >= 5:
-                            print('Had a wonderful time!\n')
-                            self.health += r.randint(1, 5)
-                        elif dice <= 4:
-                            print('Found a goblin in the forest!')
-                            self.enemy = Goblin()
-                            self.enemy_attacks()
-                            self.state = 'fight'
-                        if self.state == 'fight':
-                            fighting = True
-                            while fighting:
-                                fight_or_flee = input('\nStay and fight or flee? > ')
-                                if fight_or_flee == 'fight':
-                                    self.fight()
-                                    fighting = False
-                                elif fight_or_flee == 'flee':
-                                    self.flee()
-                                    if self.enemy is not None:
+                            if self.state == 'fight':
+                                fighting = True
+                                while fighting:
+                                    fight_or_flee = input('\nStay and fight or flee? > ')
+                                    if fight_or_flee == 'fight':
                                         self.fight()
                                         fighting = False
-                                    else:
-                                        fighting = False
-                                else:
-                                    print('Try again.')
-                        if self.health <= 0:
-                            break
-                        choice = input('Go deeper in the forest? [y/n] > ')
-                        if choice == 'n':
-                            camping = False
-                        else:
-                            forest_lvl += 1
-                if area == 3:
-                    in_town = True
-                    print(f'\n{self.name} found a small town...\n')
-                    while in_town:
-                        dice = r.randint(1, 10)
-                        print('Where would you like to go?:')
-                        answer = int(input('[0]exit \n[1]Weapon O\'Armor\'s  \n[2]Wasted Widow  \n[3]Smoking Pot \n> '))
-                        if answer == 0:
-                            break
-                        if answer == 1:
-                            gold = Gold()
-                            shopQ = int(input('Would you like to [1]buy or [2]sell? > '))
-                            if shopQ == 1:
-                                if gold in self.inventory.keys():
-                                    if self.inventory[gold] >= 150:
-                                        print('Bought a sword!')
-                                        self.inventory[gold] -= 150
-                                        sword = Weapon()
-                                        if sword not in self.inventory.keys():
-                                            self.inventory.setdefault(sword, 1)
+                                    elif fight_or_flee == 'flee':
+                                        self.flee()
+                                        if self.enemy is not None:
+                                            self.fight()
+                                            fighting = False
                                         else:
-                                            self.inventory[sword] += 1
+                                            fighting = False
                                     else:
-                                        print('Damn that sword looks, fly. Need mo\' paper though...')
-                            if shopQ == 2:
-                                pass
-                                #item = input('What would you like to sell?: ')
-                        if answer == 2:
-                            if dice <= 9:
-                                gold = Gold()
-                                if self.inventory[gold] < 15:
-                                    print(
-                                        f'{self.name} was kicked out of the bar for stealing drinks. Need some more gold...')
+                                        print('Try again.')
+
+                            if self.health <= 0:
+                                break
+                            choice = input('Go deeper in the cave? [y/n] > ')
+                            if choice == 'n':
+                                spelunking = False
+                    if area == 2:
+                        forest_lvl = 1
+                        camping = True
+                        message = [f'{self.name} frolics through the forest...',
+                                   f'{self.name} heads over the medow and through the woods...',
+                                   f'{self.name} is stumbling about in the woods...',
+                                   f'{self.name} finally feels free in the wilderness...']
+                        while camping:
+                            dice = r.randint(1, 10)
+                            print('\n' + r.choice(message))
+                            if forest_lvl % 10 == 0:
+                                answer = int(
+                                    input('\nA dark fog creeps along the forest floor...\nWill you stick around? '
+                                          '\n[1]I ain\'t scared of no fog! \n[2]GET ME OUTTA HERE. \n> '))
+                                if answer == 1:
+                                    self.enemy = Boss()
+                                    print(f'{self.enemy.name} walked menacingly out of the fog.')
+                                    self.enemy_attacks()
+                                    self.state = 'fight'
                                 else:
-                                    if 15 <= self.inventory[gold] < 500:
-                                        print('Filled up your gut and got some much needed rest.\n-15 Gold')
-                                        self.inventory[gold] -= 15
-                                        if self.health < self.health_max:
-                                            self.health += self.health_max / 4
+                                    print('I didn\'t want to know either...')
+                                    break
+                            elif dice >= 5:
+                                print('Had a wonderful time!\n')
+                                self.health += r.randint(1, 5)
+                            elif dice <= 4:
+                                print('Found a goblin in the forest!')
+                                self.enemy = Goblin()
+                                self.enemy_attacks()
+                                self.state = 'fight'
+                            if self.state == 'fight':
+                                fighting = True
+                                while fighting:
+                                    fight_or_flee = input('\nStay and fight or flee? > ')
+                                    if fight_or_flee == 'fight':
+                                        self.fight()
+                                        fighting = False
+                                    elif fight_or_flee == 'flee':
+                                        self.flee()
+                                        if self.enemy is not None:
+                                            self.fight()
+                                            fighting = False
+                                        else:
+                                            fighting = False
+                                    else:
+                                        print('Try again.')
+                            if self.health <= 0:
+                                break
+                            choice = input('Go deeper in the forest? [y/n] > ')
+                            if choice == 'n':
+                                camping = False
+                            else:
+                                forest_lvl += 1
+                    if area == 3:
+                        in_town = True
+                        print(f'\n{self.name} found a small town...\n')
+                        while in_town:
+                            dice = r.randint(1, 10)
+                            print('Where would you like to go?:')
+                            answer = int(
+                                input('[0]exit \n[1]Weapon O\'Armor\'s  \n[2]Wasted Widow  \n[3]Smoking Pot \n> '))
+                            if answer == 0:
+                                break
+                            if answer == 1:
+                                gold = Gold()
+                                shopQ = int(input('Would you like to [1]buy or [2]sell? > '))
+                                if shopQ == 1:
+                                    if gold in self.inventory.keys():
+                                        if self.inventory[gold] >= 150:
+                                            print('Bought a sword!')
+                                            self.inventory[gold] -= 150
+                                            sword = Weapon()
+                                            if sword not in self.inventory.keys():
+                                                self.inventory.setdefault(sword, 1)
+                                            else:
+                                                self.inventory[sword] += 1
+                                        else:
+                                            print('Damn that sword looks, fly. Need mo\' paper though...')
+                                if shopQ == 2:
+                                    pass
+                                    # item = input('What would you like to sell?: ')
+                            if answer == 2:
+                                if dice <= 9:
+                                    gold = Gold()
+                                    if self.inventory[gold] < 15:
+                                        print(
+                                            f'{self.name} was kicked out of the bar for stealing drinks. Need some more gold...')
+                                    else:
+                                        if 15 <= self.inventory[gold] < 500:
+                                            print('Filled up your gut and got some much needed rest.\n-15 Gold')
+                                            self.inventory[gold] -= 15
+                                            if self.health < self.health_max:
+                                                self.health += self.health_max / 4
+                                                if self.health > self.health_max:
+                                                    self.health = self.health_max
+                                        else:
+                                            print('Got laid babyyyy!')
+                                            self.health_max += r.randint(5, 10)
+                                            self.health += self.health_max / 2
                                             if self.health > self.health_max:
                                                 self.health = self.health_max
-                                    else:
-                                        print('Got laid babyyyy!')
-                                        self.health_max += r.randint(5, 10)
-                                        self.health += self.health_max / 2
-                                        if self.health > self.health_max:
-                                            self.health = self.health_max
-                        if answer == 3:
-                            print('\nHaven\'t made potions yet...\n-I mean, ye old potions aren\'t hither. *cough* *cough*')
-                        choice = input('Stick around town a little longer? [y/n] > ')
-                        if choice == 'n':
-                            in_town = False
+                            if answer == 3:
+                                print(
+                                    '\nHaven\'t made potions yet...\n-I mean, ye old potions aren\'t hither. *cough* *cough*')
+                            choice = input('Stick around town a little longer? [y/n] > ')
+                            if choice == 'n':
+                                in_town = False
+                except ValueError:
+                    print('Write a number.')
 
 
 class Boss(Characters):
     """Extra strong enemy"""
+
     def __init__(self):
         super().__init__()
         self.name = 'The Big Boss'
@@ -450,17 +462,17 @@ class Goblin(Characters):
 
 
 Commands = {
-'quit' : Player.quit,
-'help' : Player.help,
-'inventory' : Player.get_inventory,
-'stats' : Player.show_stats,
-'rest' : Player.rest,
-'explore' : Player.explore,
-'attack' : Player.fight,
-'flee' : Player.flee,
-'equipw': Player.equipw,
-'equipa': Player.equipa,
-'equipcheck': Player.get_equipped
+    'quit': Player.quit,
+    'help': Player.help,
+    'inventory': Player.get_inventory,
+    'stats': Player.show_stats,
+    'rest': Player.rest,
+    'explore': Player.explore,
+    'attack': Player.fight,
+    'flee': Player.flee,
+    'equipw': Player.equipw,
+    'equipa': Player.equipa,
+    'equipcheck': Player.get_equipped
 }
 
 p = Player()
@@ -511,18 +523,13 @@ def main():
 
 
 main()
-    #Ideas to add:
-    #-------------    
-        #potions
-            #potion shop
-       
-        #more weapoms & armor(that affects stats)
-        
-        #multiple enemy fight
-        
-        #unequip weapons and armor
+# Ideas to add:
+# -------------
+# potions
+# potion shop
 
+# more weapoms & armor(that affects stats)
 
+# multiple enemy fight
 
-
-
+# unequip weapons and armor
