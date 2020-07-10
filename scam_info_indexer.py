@@ -1,5 +1,5 @@
 # ============================================
-#           Phone Number Extractor GUI
+#           Scammer Info Indexer GUI
 #
 # Author: Slick
 # Date  : 6/26/2020
@@ -7,6 +7,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import scrolledtext
+from tkinter.ttk import Notebook
 import numpy as np
 import datetime
 import requests
@@ -27,30 +28,38 @@ class NumExtApp:
         # the goods
         self.file_path = '/home/slick/textFiles/scammer_info.csv'
         self.add_widgets()
+        self.load_text()
 
     def add_widgets(self):
+        # create tabs -------------------------------------------------------
+        self.tabcontrol = Notebook(self.win)
+        self.tab1 = Frame(self.win, bg='black')
+        self.tab2 = LabelFrame(self.win, text='Collected Data', bg='black', fg='white')
+        self.tabcontrol.add(self.tab1, text='Extract')
+        self.tabcontrol.add(self.tab2, text='View')
+        self.tabcontrol.pack(expand=1, fill=BOTH)
         # create frames-----------------------------------------------------
-        self.topframe = Frame(self.win, background='black')
-        self.midframe = Frame(self.win, background='black')
-        self.botframe = Frame(self.win, background='black')
+        self.topframe = Frame(self.tab1, background='black')
+        self.midframe = Frame(self.tab1, background='black')
+        self.botframe = Frame(self.tab1, background='black')
         # pack frames
         self.topframe.pack(expand=1, fill=BOTH, padx=5, pady=2)
         self.midframe.pack(expand=1, fill=BOTH, padx=5)
         self.botframe.pack(expand=1, fill=BOTH)
 
         # add to top frame---------------------------------------------------
-        self.title_label = Label(self.topframe, text='# Extractor 3000',
+        self.title_label = Label(self.topframe, text='Scammer Info Indexer',
                                  font=('fixedsys', 20), bg='black', fg='white')
-        self.title_label.pack(anchor='s', pady=35)
+        self.title_label.pack(anchor='s', pady=28)
 
         self.url_label = Label(self.topframe, text='URL:',
                                font=('fixedsys', 12), bg='black', fg='white')
-        self.url_label.pack(side=LEFT, anchor='n', padx=10, pady=20)
+        self.url_label.pack(side=LEFT, anchor='n', padx=10, pady=15)
 
         self.url_variable = StringVar()
-        self.entrybox = Entry(self.topframe, width=43, textvariable=self.url_variable,
+        self.entrybox = Entry(self.topframe, width=40, textvariable=self.url_variable,
                               bd=4, font=('times', 11))
-        self.entrybox.pack(side=LEFT, anchor='n', pady=20)
+        self.entrybox.pack(side=LEFT, anchor='n', pady=15)
         self.entrybox.insert(0, 'techscammersunited.com')
 
         # add top middle frame-----------------------------------------------------
@@ -61,10 +70,17 @@ class NumExtApp:
         self.clrbutton.pack(side=RIGHT, padx=40)
 
         # add to bottom frame-----------------------------------------------------
-        self.scrolltxt = scrolledtext.ScrolledText(self.botframe, height=18,
+        self.scrolltxt = scrolledtext.ScrolledText(self.botframe, height=25,
                                                    width=75,
-                                                   font=('arial', 12, 'bold'))
+                                                   font=('courier', 12, 'bold'))
         self.scrolltxt.pack()
+
+        # add to view tab
+        self.scrolltxt2 = scrolledtext.ScrolledText(self.tab2, height=18,
+                                                   width=75,
+                                                   font=('courier', 10, 'bold'))
+
+        self.scrolltxt2.pack(expand=1, fill=BOTH)
 
         #A regex match for phone numbers------------------------------------------
         self.phoneNumRegex = re.compile(r'''(
@@ -134,15 +150,17 @@ class NumExtApp:
                 with open(self.file_path, 'a') as csv_file:
                     csv_writer = csv.writer(csv_file, delimiter='\t')
                     # making a list of all numbers ALREADY collected
-                    file_nums = [row[1] for row in csv_reader]
+                    file_nums = [row[1] for row in csv_reader if row]
                     # if the phone number isn't already there, add it
                     for row in self.data:
                         type_, num, date = row
-                        if 'SCAM' in type_ and 'TOOL' not in type_ and num and \
-                                num not in file_nums and 'DEAD' not in type_:
+                        if ('SCAM' in type_ or 'OTHER' in type_) and \
+                            'TOOL' not in type_ and num and \
+                            'DEAD' not in type_ and row[1] not in file_nums:
                             csv_writer.writerow(row)
         # if no database file, will create one
         else:
+            os.makedirs('/home/slick/textFiles/scammer_info.csv')
             # create a csv writer
             with open(self.file_path, 'a') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter='\t')
@@ -159,17 +177,27 @@ class NumExtApp:
         if len(self.data) > 0:
             self.scrolltxt.insert(INSERT, f'<<{self.url_variable.get()}>>\n\n')
             title1, title2, title3 = ['Type', 'Phone Number', 'Date']
-            self.scrolltxt.insert(INSERT, ('-' * 50) + '\n')
-            self.scrolltxt.insert(INSERT, f'{title1:^21}| {title2:^15}| {title3:^8}' + '\n')
-            self.scrolltxt.insert(INSERT, ('-' * 50) + '\n')
+            self.scrolltxt.insert(INSERT, ('-' * 63) + '\n')
+            self.scrolltxt.insert(INSERT, f'{title1:^20}| {title2:^19}| {title3:^18}' + '\n')
+            self.scrolltxt.insert(INSERT, ('-' * 63) + '\n')
             for type_, num, date in self.data:
                 if num:
-                    self.scrolltxt.insert(INSERT, f'{type_:<21}| {num:15}| {date:8}' + '\n')
-                    self.scrolltxt.insert(INSERT, ('-'*50) + '\n')
+                    self.scrolltxt.insert(INSERT, f'{type_:20}| {num:^19}| {date:^18}' + '\n')
+                    self.scrolltxt.insert(INSERT, ('-' * 63) + '\n')
             self.scrolltxt.insert(INSERT, f'\n<<{self.url_variable.get()}>>\n')
             self.entrybox.delete(0, END)
+            self.load_text()
         else:
             messagebox.showerror(message='Sorry! No Luck...')
+
+    def load_text(self):
+        self.scrolltxt2.delete('1.0', END)
+        with open(self.file_path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter='\t')
+            seperator = '-'*58
+            for row in csv_reader:
+                if row:
+                    self.scrolltxt2.insert(INSERT, f'{row[0]:20}| {row[1]:^18}| {row[2]:^15}|\n{seperator}\n')
 
     def magic(self):
         """The whole sha bang"""
@@ -187,3 +215,4 @@ class NumExtApp:
 
 app = NumExtApp()
 app.win.mainloop()
+
