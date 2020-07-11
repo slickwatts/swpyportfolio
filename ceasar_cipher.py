@@ -30,6 +30,8 @@ class CaesarCipher:
         self.num2lett_dict = {index: lett for index, lett in enumerate(string.ascii_lowercase)}
         self.lett2num_dict[' '] = ' '
         self.num2lett_dict[' '] = ' '
+        self.lett2num_dict['\n'] = -1
+        self.num2lett_dict[-1] = '\n'
 
     def __str__(self):
         return self.text
@@ -38,21 +40,27 @@ class CaesarCipher:
     def increment(num, to_add):
         """Increases numbers in the range of 0-25"""
         num = num
-        for i in range(to_add):
-            num += 1
-            if num == 26:
-                num = 0
-        return num
+        if num != -1:
+            for i in range(to_add):
+                num += 1
+                if num == 26:
+                    num = 0
+            return num
+        else:
+            return num
 
     @staticmethod
     def decrement(num, to_sub):
         """Decreases numbers in the range of 0-25"""
         num = num
-        for i in range(to_sub):
-            num -= 1
-            if num == -1:
-                num = 25
-        return num
+        if num != -1:
+            for i in range(to_sub):
+                num -= 1
+                if num == -1:
+                    num = 25
+            return num
+        else:
+            return num
 
     @staticmethod
     def clean_text(text):
@@ -65,24 +73,24 @@ class CaesarCipher:
         if not reverse:
             num_message = [self.increment(self.lett2num_dict[lett], cipher_index) if lett != ' ' else ' ' for lett in
                            self.text]
-            encrypt_text = ''.join([self.num2lett_dict[num] if num != ' ' else ' ' for num in num_message])
+            encrypt_text = ''.join([self.num2lett_dict[num] if (num != ' ' or num != '\n') else ' ' for num in num_message])
             return CaesarCipher(encrypt_text)
         else:
             num_message = [self.decrement(self.lett2num_dict[lett], cipher_index) if lett != ' ' else ' ' for lett
                            in self.text]
-            encrypt_text = ''.join([self.num2lett_dict[num] if num != ' ' else ' ' for num in num_message])
+            encrypt_text = ''.join([self.num2lett_dict[num] if (num != ' ' or num != '\n') else ' ' for num in num_message])
             return CaesarCipher(encrypt_text)
 
     def decrypt(self, cipher_index=0, reverse=False):
         if not reverse:
             num_message = [self.decrement(self.lett2num_dict[lett], cipher_index) if lett != ' ' else ' ' for lett in
                            self.text]
-            decrypt_text = ''.join([self.num2lett_dict[num] if num != ' ' else ' ' for num in num_message])
+            decrypt_text = ''.join([self.num2lett_dict[num] if (num != ' ' or num != '\n') else ' ' for num in num_message])
             return CaesarCipher(decrypt_text)
         else:
             num_message = [self.increment(self.lett2num_dict[lett], cipher_index) if lett != ' ' else ' ' for lett
                            in self.text]
-            decrypt_text = ''.join([self.num2lett_dict[num] if num != ' ' else ' ' for num in num_message])
+            decrypt_text = ''.join([self.num2lett_dict[num] if (num != ' ' or num != '\n') else ' ' for num in num_message])
             return CaesarCipher(decrypt_text)
 
 
