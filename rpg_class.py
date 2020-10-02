@@ -94,21 +94,22 @@ class Characters:
                 damage = 0
             enemy.health -= damage
             if damage == 0:
-                print(f'{enemy.name} evaded the attack!')
+                print(f'\r{enemy.name} evaded the attack!', end=' ')
             elif enemy.health <= 0:
-                print(f'{self.name} finishes {enemy.name}. {enemy.name} is dead!')
+                print(f'\n{self.name} finishes {enemy.name}. {enemy.name} is dead!')
                 enemy.state = 'dead'
             else:
-                print(f'{self.name} attacks!')
-        print(f'{self.name} | {self.health}/{self.health_max}\n{enemy.name} | {enemy.health}/{enemy.health_max}')
+                print(f'\r{self.name} attacks!', end=' ')
+            if enemy.state != 'dead':
+                print(f'\r{self.name} |HP {self.health}/{self.health_max}| <<|VS|>> {enemy.name} |HP {enemy.health}/{enemy.health_max}|',
+                      end=' ')
         return enemy.health <= 0
 
 
 class Player(Characters):
     """The player character with starter stats"""
 
-    def __init__(self, health=50, health_max=80,
-                 state='normal', attack=8, defense=5):
+    def __init__(self, health=75, health_max=75, state='normal', attack=8, defense=5):
         super().__init__()
         self.health = health
         self.health_max = health_max
@@ -169,6 +170,7 @@ class Player(Characters):
                 print(f'{self.name} is startled awake!')
                 print(f'{self.enemy.name} attacks!')
                 self.enemy_attacks()
+                print('\n')
                 self.state = 'fight'
             else:
                 print('Slept like a baby...')
@@ -178,6 +180,8 @@ class Player(Characters):
                 if self.health > self.health_max:
                     print(f'{self.name} slept too much! -10 hp')
                     self.health -= 10
+                    if self.health > self.health_max:
+                        self.health = self.health_max-5
 
     def flee(self):
         """Run from fights you passafist"""
@@ -206,30 +210,31 @@ class Player(Characters):
                     self.state = 'normal'
                     gold = Gold()
                     if gold in self.inventory.keys():
-                        self.inventory[gold] += r.randint(25, 75)
+                        self.inventory[gold] += r.randint(25, 55)
                     else:
-                        self.inventory.setdefault(gold, (r.randint(10, 120)))
+                        self.inventory.setdefault(gold, (r.randint(10, 80)))
                     if self.health > self.health_max:
                         self.health = self.health_max
                         self.health_max += 5
                     else:
                         self.health_max += 5
                     if self.health <= self.health_max / 4:
-                        print(f'\n{self.name} is victorious! But is also bleeding internally...')
+                        print(f'\n{self.name} is victorious! But is also bleeding internally...\n')
                     if self.health_max / 2 > self.health > self.health_max / 4:
-                        print(f'\n{self.name} feels pretty tired after that one!')
+                        print(f'\n{self.name} feels pretty tired after that one!\n')
                     if self.health_max / 2 < self.health < self.health_max / 1.25:
                         print(f'\n{self.name} feels warmed up now!')
                     if self.health >= self.health_max / 1.25:
-                        print(f'\n{self.name} didn\'t even feel a scratch.')
+                        print(f'\n{self.name} didn\'t even feel a scratch.\n')
+                    time.sleep(2)
                 else:
                     self.enemy_attacks()
 
     def enemy_attacks(self):
         """Attack from enemy"""
-        time.sleep(.5)
+        time.sleep(.7)
         if self.enemy.kills(self):
-            print(f"{self.name} was clapped by {self.enemy.name}!!!\n\nR.I.P GAME OVER.")
+            print(f"\n{self.name} was clapped by {self.enemy.name}!!!\n\nR.I.P GAME OVER.")
 
     def equipw(self):
         """[IN PROGRESS] Equips weapon in inventory"""
@@ -238,9 +243,9 @@ class Player(Characters):
                 if isinstance(item, Weapon):
                     self.equipped['weapon'] = item.name
                     self.attack += item.attack
-                    print(f'{item.name} equipped!')
+                    print(f'{item.name} equipped!\n')
             if self.equipped['weapon'] is None:
-                print('No weapon equipped')
+                print('No weapon equipped\n')
 
     def equipa(self):
         """[IN PROGRESS] Equips armor in inventory"""
@@ -249,9 +254,9 @@ class Player(Characters):
                 if isinstance(item, Armor):
                     self.equipped['armor'] = item.name
                     self.defense += item.defense
-                    print(f'{item.name} equipped!')
+                    print(f'{item.name} equipped!\n')
             if self.equipped['armor'] is None:
-                print('No armor equipped')
+                print('No armor equipped\n')
 
     def explore(self):
         """The choosy part of the game logic"""
@@ -264,7 +269,8 @@ class Player(Characters):
                 if self.health <= 0:
                     break
                 try:
-                    print('\nWhere do you want to explore?:')
+                    gold = Gold()
+                    print(f'\nWhere do you want to explore?\nPlayer Gold: {self.inventory.get(gold, 0)}')
                     area = int(input('[0]exit \n[1]cave \n[2]forest \n[3]city \n> '))
                     if area == 0:
                         exploring = False
@@ -278,6 +284,7 @@ class Player(Characters):
                         while spelunking:
                             dice = r.randint(1, 10)
                             print('\n' + r.choice(message))
+                            time.sleep(2)
                             if dice >= 8:
                                 if dice % 2 == 0:
                                     print('Found some Gold!')
@@ -295,6 +302,10 @@ class Player(Characters):
                                         self.inventory[armor] += 1
                                     else:
                                         self.inventory.setdefault(armor, 1)
+                                    if self.equipped['armor'] is None:
+                                        choice = input('Equip Armor? [y/n] > ').lower()
+                                        if choice == 'y':
+                                            self.equipa()
                             else:
                                 self.enemy = Goblin()
                                 print(f'\n{self.name} found a goblin in the cave!')
@@ -303,13 +314,14 @@ class Player(Characters):
                             if self.state == 'fight':
                                 fighting = True
                                 while fighting:
-                                    fight_or_flee = input('\nStay and fight or flee? > ')
+                                    fight_or_flee = input('\n\nStay and fight or flee? > ')
                                     if fight_or_flee == 'fight':
                                         self.fight()
                                         fighting = False
                                     elif fight_or_flee == 'flee':
                                         self.flee()
                                         if self.enemy is not None:
+                                            print('\n')
                                             self.fight()
                                             fighting = False
                                         else:
@@ -319,7 +331,7 @@ class Player(Characters):
 
                             if self.health <= 0:
                                 break
-                            choice = input('Go deeper in the cave? [y/n] > ')
+                            choice = input(f'[HP {self.health}/{self.health_max}|GOLD {self.inventory.get(gold, 0)}]\nGo deeper in the cave? [y/n] > ')
                             if choice == 'n':
                                 spelunking = False
                     if area == 2:
@@ -332,6 +344,7 @@ class Player(Characters):
                         while camping:
                             dice = r.randint(1, 10)
                             print('\n' + r.choice(message))
+                            time.sleep(2)
                             if forest_lvl % 10 == 0:
                                 answer = int(
                                     input('\nA dark fog creeps along the forest floor...\nWill you stick around? '
@@ -339,6 +352,7 @@ class Player(Characters):
                                 if answer == 1:
                                     self.enemy = Boss()
                                     print(f'{self.enemy.name} walked menacingly out of the fog.')
+                                    print('\n')
                                     self.enemy_attacks()
                                     self.state = 'fight'
                                 else:
@@ -355,7 +369,7 @@ class Player(Characters):
                             if self.state == 'fight':
                                 fighting = True
                                 while fighting:
-                                    fight_or_flee = input('\nStay and fight or flee? > ')
+                                    fight_or_flee = input('\n\nStay and fight or flee? > ')
                                     if fight_or_flee == 'fight':
                                         self.fight()
                                         fighting = False
@@ -370,7 +384,7 @@ class Player(Characters):
                                         print('Try again.')
                             if self.health <= 0:
                                 break
-                            choice = input('Go deeper in the forest? [y/n] > ')
+                            choice = input(f'[HP {self.health}/{self.health_max}|GOLD {self.inventory.get(gold, 0)}]\nGo deeper in the forest? [y/n] > ')
                             if choice == 'n':
                                 camping = False
                             else:
@@ -380,35 +394,73 @@ class Player(Characters):
                         print(f'\n{self.name} found a small town...\n')
                         while in_town:
                             dice = r.randint(1, 10)
-                            print('Where would you like to go?:')
+                            print(f'Where would you like to go?:\nPlayer Gold: {self.inventory.get(gold, 0)}')
                             answer = int(
                                 input('[0]exit \n[1]Weapon O\'Armor\'s  \n[2]Wasted Widow  \n[3]Smoking Pot \n> '))
                             if answer == 0:
                                 break
                             if answer == 1:
-                                gold = Gold()
-                                shopQ = int(input('Would you like to [1]buy or [2]sell? > '))
-                                if shopQ == 1:
-                                    if gold in self.inventory.keys():
-                                        if self.inventory[gold] >= 150:
-                                            print('Bought a sword!')
-                                            self.inventory[gold] -= 150
-                                            sword = Weapon()
-                                            if sword not in self.inventory.keys():
-                                                self.inventory.setdefault(sword, 1)
+                                shopping = True
+                                while shopping:
+                                    # gold = Gold()
+                                    shopQ = input(
+                                        f'\nWhat would you like to do?:\nPlayer Gold: {self.inventory.get(gold, 0)}\n[0]exit\n[1]buy\n[2]sell\n> ')
+                                    if shopQ == '0' or shopQ == 'exit':
+                                        shopping = False
+                                    if shopQ == '1' or shopQ == 'buy':
+                                        buying = True
+                                        while buying:
+                                            print(
+                                                f'\nPlayer Gold: {self.inventory.get(gold, 0)}\n(0)None\n(1)[150 G] Steel Straight Sword\n(2)[500 G] Leather Armor')
+                                            store_choice = input('\nTake your pick > ')
+                                            if store_choice == '0' or 'none' in store_choice.lower():
+                                                buying = False
+                                            elif store_choice == '1' or 'steel' in store_choice.lower():
+                                                if self.inventory.get(gold, 0) >= 150:
+                                                    print('\nBought a sword!')
+                                                    time.sleep(2)
+                                                    self.inventory[gold] -= 150
+                                                    steelsword = Weapon()
+                                                    if steelsword not in self.inventory.keys():
+                                                        self.inventory.setdefault(steelsword, 1)
+                                                    else:
+                                                        self.inventory[steelsword] += 1
+                                                    if self.equipped['weapon'] is None:
+                                                        choice = input('Equip Weapon? [y/n] > ').lower()
+                                                        if choice == 'y':
+                                                            self.equipw()
+                                                else:
+                                                    print('\nDamn that sword looks, fly. Need mo\' paper though...')
+                                                buying = False
+                                            elif store_choice == '2' or 'leather' in store_choice.lower():
+                                                if self.inventory.get(gold, 0) >= 500:
+                                                    print('\nBought some armor!')
+                                                    time.sleep(2)
+                                                    self.inventory[gold] -= 150
+                                                    leatherarmor = Armor()
+                                                    if leatherarmor not in self.inventory.keys():
+                                                        self.inventory.setdefault(leatherarmor, 1)
+                                                    else:
+                                                        self.inventory[leatherarmor] += 1
+                                                    if self.equipped['armor'] is None:
+                                                        choice = input('Equip Armor? [y/n] > ').lower()
+                                                        if choice == 'y':
+                                                            self.equipa()
+                                                else:
+                                                    print(
+                                                        '\nDamn that set of armor looks, fly. Need mo\' paper though...')
+                                                buying = False
                                             else:
-                                                self.inventory[sword] += 1
-                                        else:
-                                            print('Damn that sword looks, fly. Need mo\' paper though...')
-                                if shopQ == 2:
-                                    pass
-                                    # item = input('What would you like to sell?: ')
+                                                print('Didn\'t understand, try again.')
+                                    if shopQ == '2' or shopQ == 'sell':
+                                        pass
+                                        # item = input('What would you like to sell?: ')
                             if answer == 2:
                                 if dice <= 9:
                                     gold = Gold()
                                     if self.inventory[gold] < 15:
-                                        print(
-                                            f'{self.name} was kicked out of the bar for stealing drinks. Need some more gold...')
+                                        print(f'{self.name} was kicked out of the bar for stealing drinks.', end='')
+                                        print(" Need some more gold...")
                                     else:
                                         if 15 <= self.inventory[gold] < 500:
                                             print('Filled up your gut and got some much needed rest.\n-15 Gold')
@@ -425,7 +477,7 @@ class Player(Characters):
                                                 self.health = self.health_max
                             if answer == 3:
                                 print(
-                                    '\nHaven\'t made potions yet...\n-I mean, ye old potions aren\'t hither. *cough* *cough*')
+                                    '\nHaven\'t made potions yet...\n-I mean, ye old potions aren\'t hither. *cough*')
                             choice = input('Stick around town a little longer? [y/n] > ')
                             if choice == 'n':
                                 in_town = False
@@ -468,7 +520,7 @@ Commands = {
     'stats': Player.show_stats,
     'rest': Player.rest,
     'explore': Player.explore,
-    'attack': Player.fight,
+    'fight': Player.fight,
     'flee': Player.flee,
     'equipw': Player.equipw,
     'equipa': Player.equipa,
@@ -478,7 +530,10 @@ Commands = {
 p = Player()
 p.name = input('What\'s your hero\'s name?: ')
 print('Type "help" to get a list of actions\n')
-print(f'{p.name}... You are the chosen one. You are the sexy one. Go on and do... HERO THINGS!')
+welcome = f'{p.name}... You are the chosen one. You are the sexy one. Go on and do... HERO THINGS!\n'
+for lett in welcome:
+    print(lett, end='')
+    time.sleep(.1)
 
 
 def replay_start():
@@ -486,8 +541,10 @@ def replay_start():
     p = Player()
     p.name = input('What\'s your hero\'s name?: ')
     print('Type "help" to get a list of actions\n')
-    print(f'''{p.name}... Now YOU are the chosen one.
-You are the sexy one. Go on and do... EVEN MORE HERO THINGS!''')
+    welcome = f'{p.name}... Now YOU are the chosen one. You are the sexy one. Go on and do... EVEN MORE HERO THINGS!\n'
+    for lett in welcome:
+        print(lett, end='')
+        time.sleep(.1)
 
 
 def game_loop():

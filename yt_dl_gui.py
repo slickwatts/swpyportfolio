@@ -4,14 +4,14 @@
 # Author: Slick
 # Date  :
 # ===============================================
-from tkinter import *
-from tkinter import messagebox
-from tkinter.scrolledtext import ScrolledText
-from tkinter.ttk import Notebook
 import youtube_search
 import youtube_dl as ytd
 import requests
 import os
+from tkinter import *
+from tkinter import messagebox
+from tkinter.scrolledtext import ScrolledText
+from tkinter.ttk import Notebook
 from PIL import Image, ImageTk
 
 
@@ -180,6 +180,10 @@ class DownloaderApp:
 
         self.search_entry.focus()
 
+    # ===========================================
+    # METHODS
+    # ===========================================
+
     def search(self):
         """Searches YouTube with keyword(s) provided and displays
            results in the "Results" frame below also saves a list of
@@ -191,7 +195,7 @@ class DownloaderApp:
             for i, video in enumerate(self.results):
                 self.video_choices.insert(INSERT, f'VIDEO #{i+1}\n')
                 for info in video[:2]:
-                    self.video_choices.insert(INSERT, info + '\n')
+                    self.video_choices.insert(INSERT, str(info) + '\n')
                 self.video_choices.insert(INSERT, '\n')
             self.video_choices.configure(state='disabled')
             self.vid_index_picker.configure(values=list(range(1, len(self.results))))
